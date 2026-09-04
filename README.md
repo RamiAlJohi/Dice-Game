@@ -101,9 +101,33 @@ GitHub Pages serves a project site under `/<repo>/`, so the build sets Vite's `b
 accordingly. CI derives it from the repo name. For a custom domain or a
 `<user>.github.io` repo, build with `BASE_PATH=/ npm run build`.
 
-### Native app
+## Android APK
 
-If you later want a real store listing, wrap the same `dist/` build with
-[Capacitor](https://capacitorjs.com/) — no engine changes required. Note that an
-Android APK needs the Android SDK, and iOS needs Xcode plus a paid Apple Developer
-account to install on a device; the PWA above avoids both.
+For a real sideloadable Android app, the repo is wrapped with
+[Capacitor](https://capacitorjs.com/) and CI assembles a debug APK on every push.
+
+**Get the APK:** open the **Actions** tab -> the latest *Build Android APK* run ->
+download the `dice-roguelite-debug-apk` artifact. Unzip it and copy `app-debug.apk`
+to your phone.
+
+**Install it:** tap the file and allow "install unknown apps" for whichever app is
+opening it (Files or your browser). This is a normal sideload; the APK is signed
+with the standard Android debug key, so it installs but is not Play Store material.
+Shipping to the Play Store needs a release keystore, which should live in repo
+secrets rather than in git.
+
+**Build locally** (needs the Android SDK and JDK 21):
+
+```bash
+npm run build:mobile                      # web build + cap sync
+cd android && ./gradlew assembleDebug     # -> app/build/outputs/apk/debug/
+```
+
+`build:mobile` sets `BASE_PATH=/` because Capacitor serves the app off the device
+filesystem, not from the `/<repo>/` path GitHub Pages uses. Building the web bundle
+with the Pages base path and packaging *that* would give a blank screen.
+
+### iOS
+
+Not wired up. iOS needs macOS, Xcode, and an Apple Developer account to install on a
+device, so the PWA above is the practical route on iPhone.
